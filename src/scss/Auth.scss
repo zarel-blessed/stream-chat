@@ -1,0 +1,84 @@
+.register-page,
+.login-page {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  width: 100%;
+  background-color: hsl(0, 0%, 0%);
+
+  .form-popup {
+    display: flex;
+
+    .stream-chat-banner {
+      display: grid;
+      align-items: center;
+      justify-content: center;
+      padding: 2em;
+      background-color: var(--clr-black);
+      color: var(--clr-white);
+      border-radius: 1em;
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        h1 {
+          font-size: 1.875rem;
+          font-weight: 600;
+          line-height: 1.1;
+
+          span {
+            color: var(--clr-primary);
+          }
+        }
+
+        h2 {
+          font-size: 1.25rem;
+          font-weight: 400;
+          color: var(--clr-grey);
+        }
+      }
+    }
+
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2em;
+      padding: 2em;
+      background-color: var(--clr-white);
+      color: var(--clr-black);
+      border-radius: 1em;
+
+      & > div {
+        text-align: center;
+
+        h2 {
+          line-height: 1.05;
+
+          span {
+            color: var(--clr-primary);
+          }
+        }
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2em;
+
+        & :not(input[type="submit"]) {
+          padding: 0.5em 1em;
+          width: min(400px, 90vh);
+          background-color: transparent;
+          border-bottom: 2px solid var(--clr-grey);
+        }
+      }
+
+      small {
+        text-align: center;
+      }
+    }
+  }
+}
