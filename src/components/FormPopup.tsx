@@ -1,13 +1,42 @@
+import { FormEvent } from "react";
 import Logo from "../assets/stream-chat-logo.svg";
 import { Link } from "react-router-dom";
 import "../scss/Auth.scss";
+import { auth, db } from "../server/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
-interface formProps {
-  page: string;
-}
+const FormPopup = ({ page }: { page: string }) => {
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
 
-const FormPopup = (props: formProps) => {
-  let { page } = props;
+    const displayName = ((e.target as HTMLFormElement)[0] as HTMLFormElement)
+      .value;
+    const email = ((e.target as HTMLFormElement)[1] as HTMLFormElement).value;
+    const password = ((e.target as HTMLFormElement)[2] as HTMLFormElement)
+      .value;
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      console.log(user);
+      setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        displayName,
+        email,
+        password,
+      });
+    } catch (error: any) {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(`${errorCode}: ${errorMessage}`);
+    }
+  };
+
   return (
     <div className="form-popup">
       <div className="stream-chat-banner">
@@ -26,7 +55,7 @@ const FormPopup = (props: formProps) => {
           </h2>
           <p>{page == "register" ? "Register" : "Login"} using your email ID</p>
         </div>
-        <form>
+        <form onSubmit={handleSubmit}>
           {page == "register" && <input type="text" placeholder="Name" />}
           <input type="email" placeholder="Email" />
           <input type="password" placeholder="Password" />
