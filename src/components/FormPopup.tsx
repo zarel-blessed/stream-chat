@@ -1,39 +1,81 @@
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import Logo from "../assets/stream-chat-logo.svg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../scss/Auth.scss";
 import { auth, db } from "../server/firebase";
 import { doc, setDoc } from "firebase/firestore";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { useUser } from "../Contexts/UserContext";
 
 const FormPopup = ({ page }: { page: string }) => {
+  const { setUser } = useUser();
+  const navigate = useNavigate();
+  const [error, setError] = useState(false);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const displayName = ((e.target as HTMLFormElement)[0] as HTMLFormElement)
-      .value;
-    const email = ((e.target as HTMLFormElement)[1] as HTMLFormElement).value;
-    const password = ((e.target as HTMLFormElement)[2] as HTMLFormElement)
-      .value;
+    if (page == "register") {
+      try {
+        const displayName = (
+          (e.target as HTMLFormElement)[0] as HTMLFormElement
+        ).value;
+        const email = ((e.target as HTMLFormElement)[1] as HTMLFormElement)
+          .value;
+        const password = ((e.target as HTMLFormElement)[2] as HTMLFormElement)
+          .value;
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        const user = userCredential.user;
+        console.log(user);
+        setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          displayName,
+          email,
+          password,
+        });
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-      console.log(user);
-      setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        displayName,
-        email,
-        password,
-      });
-    } catch (error: any) {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log(`${errorCode}: ${errorMessage}`);
+        setUser({
+          displayName,
+          email,
+          password,
+        });
+
+        navigate("/");
+      } catch (error) {
+        setError(true);
+      }
+    } else {
+      try {
+        const email = ((e.target as HTMLFormElement)[0] as HTMLFormElement)
+          .value;
+        const password = ((e.target as HTMLFormElement)[1] as HTMLFormElement)
+          .value;
+        const userCredentials = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        const user = userCredentials.user;
+
+        const displayName = user.displayName;
+
+        setUser({
+          displayName,
+          email,
+          password,
+        });
+
+        navigate("/");
+      } catch (error) {
+        setError(true);
+      }
     }
   };
 
@@ -74,6 +116,13 @@ const FormPopup = ({ page }: { page: string }) => {
           ) : (
             <Link to="/register">Register</Link>
           )}
+        </small>
+        <small
+          style={{
+            color: "red",
+          }}
+        >
+          {error && "Something went wrong"}
         </small>
       </div>
     </div>
